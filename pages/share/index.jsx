@@ -9,6 +9,7 @@ export default function Share() {
 
   useEffect(() => {
     const s = io("http://150.95.82.125:4000");
+    // const s = io("http://localhost:4001");
     setSocket(s);
     s.on("connect", () => {
       s.on("init", (payload) => {
@@ -18,12 +19,12 @@ export default function Share() {
       s.on("users", (payload) => {
         setUsers(payload);
       });
-      s.on("file:recieve", (buffer) => {
+      s.on("file:recieve", (payload) => {
         console.log("recived");
-        const blob = new Blob([buffer]);
+        const blob = new Blob([payload.buffer]);
         const a = document.createElement("a");
         a.href = window.URL.createObjectURL(blob);
-        a.download = "test.xls";
+        a.download = payload.filename;
         a.click();
       });
     });
@@ -37,7 +38,7 @@ export default function Share() {
       fr.readAsArrayBuffer(f.file);
       fr.addEventListener("load", () => {
         console.log("emit");
-        socket.emit("file:transfer", id, fr.result);
+        socket.emit("file:transfer", id, fr.result, f.file.name);
       });
     }
   };
